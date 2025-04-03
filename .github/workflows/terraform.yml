@@ -1,1 +1,54 @@
 # Pipeline de GitHub Actions para formateo, validación y plan de Terraform
+name: 'Terraform CI'
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Format (dev)
+        run: terraform fmt -check
+        working-directory: ./env/dev
+
+      - name: Terraform Init (dev)
+        run: terraform init
+        working-directory: ./env/dev
+
+      - name: Terraform Validate (dev)
+        run: terraform validate
+        working-directory: ./env/dev
+
+      - name: Terraform Plan (dev)
+        run: terraform plan -out=tfplan.out
+        working-directory: ./env/dev
+
+      - name: Terraform Show Plan (dev)
+        run: terraform show -no-color tfplan.out
+        working-directory: ./env/dev
+
+      # Opcional: Repetir para el entorno prod si se requiere
+      - name: Terraform Format (prod)
+        run: terraform fmt -check
+        working-directory: ./env/prod
+
+      - name: Terraform Init (prod)
+        run: terraform init
+        working-directory: ./env/prod
+
+      - name: Terraform Validate (prod)
+        run: terraform validate
+        working-directory: ./env/prod
+
+      - name: Terraform
